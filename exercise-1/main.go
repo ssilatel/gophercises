@@ -3,12 +3,16 @@ package main
 import (
 	"bufio"
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"os"
 )
 
 func main() {
-	in, err := os.Open("problems.csv")
+	filename := flag.String("f", "problems.csv", "Path to the CSV file for the quiz")
+	flag.Parse()
+
+	in, err := os.Open(*filename)
 	if err != nil {
 		panic(err)
 	}
@@ -31,5 +35,5 @@ func main() {
 		}
 	}
 
-	fmt.Printf("\nYou got %d out of %d answers correctly\n", correct, len(records))
+	fmt.Printf("\nYou answered %d out of %d questions correctly\n", correct, len(records))
 }
