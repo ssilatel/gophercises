@@ -10,7 +10,14 @@ import (
 // If the path is not provided in the map, then the fallback http.Handler
 // will be called instead.
 func mapHandler(pathsToUrls map[string]string, fallback http.Handler) http.HandlerFunc {
-	return nil
+	return func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+		if dest, ok := pathsToUrls[path]; ok {
+			http.Redirect(w, r, dest, http.StatusFound)
+			return
+		}
+		fallback.ServeHTTP(w, r)
+	}
 }
 
 // yamlHandler will parse the provided YAML and then return an http.HandlerFunc
@@ -47,16 +54,16 @@ func main() {
 	}
 	mapHandler := mapHandler(pathsToUrls, mux)
 
-	yaml := `
-- path: /urlshort
-url: https://github.com/gophercises/urlshort
-- path: /urlshort-final
-url: https://github.com/gophercises/urlshort/tree/solution
-	`
-	yamlHandler, err := yamlHandler([]byte(yaml), mapHandler)
-	if err != nil {
-		panic(err)
-	}
+	//	yaml := `
+	//- path: /urlshort
+	//url: https://github.com/gophercises/urlshort
+	//- path: /urlshort-final
+	//url: https://github.com/gophercises/urlshort/tree/solution
+	//	`
+	//	yamlHandler, err := yamlHandler([]byte(yaml), mapHandler)
+	//	if err != nil {
+	//		panic(err)
+	//	}
 	fmt.Println("Starting the server on :8080")
-	http.ListenAndServe(":8080", yamlHandler)
+	http.ListenAndServe(":8080", mapHandler)
 }
