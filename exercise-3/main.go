@@ -76,7 +76,7 @@ func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 `
 
 	tmpl := template.Must(template.New("").Parse(t))
-	tmpl.Execute(w, h.s["intro"])
+	tmpl.Execute(w, h.s[r.URL.Path[1:]])
 }
 
 func main() {
