@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -26,7 +26,57 @@ type handler struct {
 }
 
 func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "hello")
+	t := `
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Choose Your Own Adventure</title>
+		<style>
+			.main-div {
+				display: flex;
+				flex-direction: column;
+				border: 5px solid;
+				margin: auto;
+				width: 600px;
+				padding: 10px;
+				text-align: center;
+				align-items: center;
+			}
+
+			.options {
+				width: 400px;
+			}
+
+			ul {
+				border-top: 3px dotted #ddd;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="main-div">
+			<h1>{{.Title}}</h1>
+			<div>
+				{{range .Story}}
+					<p>{{.}}</p>
+				{{end}}
+			</div>
+			{{if .Options}}
+			<div class="options">
+				<ul>
+					{{range .Options}}
+						<li><a href="/{{.Arc}}">{{.Text}}</a></li>
+					{{end}}
+				</ul>
+			</div>
+			{{end}}
+		</div>
+	</body>
+</html>
+`
+
+	tmpl := template.Must(template.New("").Parse(t))
+	tmpl.Execute(w, h.s["intro"])
 }
 
 func main() {
@@ -42,6 +92,7 @@ func main() {
 		panic(err)
 	}
 
-	http.Handle("/", new(handler))
+	h := handler{s: story}
+	http.Handle("/", h)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
