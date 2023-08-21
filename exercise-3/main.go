@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
 	"os"
 )
 
@@ -19,6 +21,14 @@ type Option struct {
 	Arc  string `json:"arc"`
 }
 
+type handler struct {
+	s Story
+}
+
+func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "hello")
+}
+
 func main() {
 	// Decoding the JSON file
 	file, err := os.Open("story.json")
@@ -31,5 +41,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(story)
+
+	http.Handle("/", new(handler))
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
