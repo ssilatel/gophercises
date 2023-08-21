@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"gopkg.in/yaml.v3"
 )
 
 // mapHandler will return an http.HandlerFunc that will attempt to map any
@@ -31,8 +33,24 @@ func mapHandler(pathsToUrls map[string]string, fallback http.Handler) http.Handl
 //     url: https://www.some-url.com/demo
 //
 // The only errors that can be returned are related to having invalid YAML data.
-func yamlHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
-	return nil, nil
+func yamlHandler(yamlBytes []byte, fallback http.Handler) (http.HandlerFunc, error) {
+	var pathUrls []pathUrl
+	err := yaml.Unmarshal(yamlBytes, &pathUrls)
+	if err != nil {
+		return nil, err
+	}
+
+	pathsToUrls := make(map[string]string)
+	for _, pu := range pathUrls {
+		pathsToUrls[pu.Path] = pu.URL
+	}
+
+	return mapHandler(pathsToUrls, fallback), nil
+}
+
+type pathUrl struct {
+	Path string `yaml:"path"`
+	URL  string `yaml:"url"`
 }
 
 func defaultMux() *http.ServeMux {
@@ -54,16 +72,16 @@ func main() {
 	}
 	mapHandler := mapHandler(pathsToUrls, mux)
 
-	//	yaml := `
-	//- path: /urlshort
-	//url: https://github.com/gophercises/urlshort
-	//- path: /urlshort-final
-	//url: https://github.com/gophercises/urlshort/tree/solution
-	//	`
-	//	yamlHandler, err := yamlHandler([]byte(yaml), mapHandler)
-	//	if err != nil {
-	//		panic(err)
-	//	}
+	yaml := `
+ - path: /urlshort
+   url: https://github.com/gophercises/urlshort
+ - path: /urlshort-final
+   url: https://github.com/gophercises/urlshort/tree/solution
+`
+	yamlHandler, err := yamlHandler([]byte(yaml), mapHandler)
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println("Starting the server on :8080")
-	http.ListenAndServe(":8080", mapHandler)
+	http.ListenAndServe(":8080", yamlHandler)
 }
