@@ -75,8 +75,12 @@ func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 </html>
 `
 
+	currentPage := r.URL.Path[1:]
+	if r.URL.Path == "/" {
+		http.Redirect(w, r, "/intro", http.StatusSeeOther)
+	}
 	tmpl := template.Must(template.New("").Parse(t))
-	tmpl.Execute(w, h.s[r.URL.Path[1:]])
+	tmpl.Execute(w, h.s[currentPage])
 }
 
 func main() {
