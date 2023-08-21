@@ -1,5 +1,8 @@
-## Gophercises
+## Text Adventure Website
 
-These are my solutions to [Gophercises](gophercises.com).
+The server reads from a JSON file which contains the branches to the story.
 
-Each directory contains a README file with the respective exercise description.
+Run the server with `go run main.go`.
+
+The server is running on port 8080.
+
