@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"strings"
@@ -13,13 +14,17 @@ type Link struct {
 	Text string
 }
 
-func main() {
-	//	file, err := os.Open("ex1.html")
-	//	if err != nil {
-	//		panic(err)
-	//	}
+func (l *Link) printLink() {
+	fmt.Println("href: " + l.Href)
+	fmt.Println("text: " + l.Text)
+	fmt.Println()
+}
 
-	htmlFile, err := ioutil.ReadFile("ex1.html")
+func main() {
+	filename := flag.String("f", "ex1.html", "HTML file to parse")
+	flag.Parse()
+
+	htmlFile, err := ioutil.ReadFile(*filename)
 	if err != nil {
 		panic(err)
 	}
@@ -29,19 +34,25 @@ func main() {
 		panic(err)
 	}
 
-	var parseHTML func(*html.Node)
-	parseHTML = func(n *html.Node) {
+	links := []Link{}
+
+	var parseHtml func(*html.Node)
+	parseHtml = func(n *html.Node) {
 		if n.Type == html.ElementNode && n.Data == "a" {
 			for _, a := range n.Attr {
 				if a.Key == "href" {
-					fmt.Println(a.Val)
+					links = append(links, Link{Href: a.Val, Text: n.FirstChild.Data})
 					break
 				}
 			}
 		}
 		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			parseHTML(c)
+			parseHtml(c)
 		}
 	}
-	parseHTML(doc)
+	parseHtml(doc)
+
+	for _, l := range links {
+		l.printLink()
+	}
 }
