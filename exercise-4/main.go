@@ -14,10 +14,43 @@ type Link struct {
 	Text string
 }
 
+var links []Link
+
 func (l *Link) printLink() {
 	fmt.Println("href: " + l.Href)
 	fmt.Println("text: " + l.Text)
 	fmt.Println()
+}
+
+func parseText(n *html.Node) string {
+	if n.Type == html.TextNode {
+		return n.Data
+	} else {
+		return ""
+	}
+	var text string
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		text += parseText(c)
+	}
+	return strings.Join(strings.Fields(text), " ")
+}
+
+func parseHtml(n *html.Node) {
+	if n.Type == html.ElementNode && n.Data == "a" {
+		var text string
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			text += parseText(c)
+		}
+		for _, a := range n.Attr {
+			if a.Key == "href" {
+				links = append(links, Link{Href: a.Val, Text: text})
+				break
+			}
+		}
+	}
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		parseHtml(c)
+	}
 }
 
 func main() {
@@ -32,23 +65,6 @@ func main() {
 	doc, err := html.Parse(strings.NewReader(string(htmlFile)))
 	if err != nil {
 		panic(err)
-	}
-
-	links := []Link{}
-
-	var parseHtml func(*html.Node)
-	parseHtml = func(n *html.Node) {
-		if n.Type == html.ElementNode && n.Data == "a" {
-			for _, a := range n.Attr {
-				if a.Key == "href" {
-					links = append(links, Link{Href: a.Val, Text: n.FirstChild.Data})
-					break
-				}
-			}
-		}
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			parseHtml(c)
-		}
 	}
 	parseHtml(doc)
 
