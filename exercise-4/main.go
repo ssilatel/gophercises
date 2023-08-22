@@ -14,18 +14,17 @@ type Link struct {
 	Text string
 }
 
-var links []Link
-
-func (l *Link) printLink() {
-	fmt.Println("href: " + l.Href)
-	fmt.Println("text: " + l.Text)
-	fmt.Println()
-}
+//func (l *Link) printLink() {
+//	fmt.Println("href: " + l.Href)
+//	fmt.Println("text: " + l.Text)
+//	fmt.Println()
+//}
 
 func parseText(n *html.Node) string {
 	if n.Type == html.TextNode {
 		return n.Data
-	} else {
+	}
+	if n.Type != html.ElementNode {
 		return ""
 	}
 	var text string
@@ -35,22 +34,27 @@ func parseText(n *html.Node) string {
 	return strings.Join(strings.Fields(text), " ")
 }
 
-func parseHtml(n *html.Node) {
+func findNodes(n *html.Node) []*html.Node {
 	if n.Type == html.ElementNode && n.Data == "a" {
-		var text string
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			text += parseText(c)
-		}
-		for _, a := range n.Attr {
-			if a.Key == "href" {
-				links = append(links, Link{Href: a.Val, Text: text})
-				break
-			}
-		}
+		return []*html.Node{n}
 	}
+	var nodes []*html.Node
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		parseHtml(c)
+		nodes = append(nodes, findNodes(c)...)
 	}
+	return nodes
+}
+
+func newLink(n *html.Node) Link {
+	var l Link
+	for _, attr := range n.Attr {
+		if attr.Key == "href" {
+			l.Href = attr.Val
+			break
+		}
+	}
+	l.Text = parseText(n)
+	return l
 }
 
 func main() {
@@ -66,9 +70,15 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	parseHtml(doc)
 
-	for _, l := range links {
-		l.printLink()
+	nodes := findNodes(doc)
+	var links []Link
+	for _, node := range nodes {
+		links = append(links, newLink(node))
 	}
+
+	fmt.Println(links)
+	//	for _, l := range links {
+	//		l.printLink()
+	//	}
 }
