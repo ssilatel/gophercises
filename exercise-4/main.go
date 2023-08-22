@@ -14,12 +14,6 @@ type Link struct {
 	Text string
 }
 
-//func (l *Link) printLink() {
-//	fmt.Println("href: " + l.Href)
-//	fmt.Println("text: " + l.Text)
-//	fmt.Println()
-//}
-
 func parseText(n *html.Node) string {
 	if n.Type == html.TextNode {
 		return n.Data
@@ -78,7 +72,4 @@ func main() {
 	}
 
 	fmt.Println(links)
-	//	for _, l := range links {
-	//		l.printLink()
-	//	}
 }
