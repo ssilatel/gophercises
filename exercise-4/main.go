@@ -1,4 +1,4 @@
-package "github.com/ssilatel/gophercises/exercise-4"
+package exercise4
 
 import (
 	"flag"
