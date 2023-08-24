@@ -1,4 +1,4 @@
-module link
+module github.com/ssilatel/gophercises/link
 
 go 1.20
 
