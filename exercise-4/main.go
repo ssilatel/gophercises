@@ -51,6 +51,15 @@ func newLink(n *html.Node) Link {
 	return l
 }
 
+func FindLinks(rootNode *html.Node) []Link {
+	nodes := findNodes(rootNode)
+	var links []Link
+	for _, node := range nodes {
+		links = append(links, newLink(node))
+	}
+	return links
+}
+
 func main() {
 	filename := flag.String("f", "ex1.html", "HTML file to parse")
 	flag.Parse()
