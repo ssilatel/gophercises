@@ -1,4 +1,4 @@
-package html-parser
+package github.com/ssilatel/gophercises/exercise-4
 
 import (
 	"flag"
