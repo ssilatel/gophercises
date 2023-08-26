@@ -1,3 +1,5 @@
+# Exercise 1
+
 ## Simple CLI Quiz
 
 #### A simple program that asks different questions and tells you how many you got right
