@@ -1,3 +1,5 @@
+# Exercise 2
+
 ## Simple URL Shortener
 
 Run the server with `go run main.go`.
