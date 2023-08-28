@@ -35,7 +35,19 @@ func main() {
 	urlFlag := flag.String("u", "https://www.calhoun.io", "URL to scan")
 	flag.Parse()
 
-	links := parseHtml(*urlFlag)
+	anchorTags := parseHtml(*urlFlag)
+	links := make([]string, len(anchorTags))
+	for _, a := range anchorTags {
+		if len(a.Href) > 0 {
+			if a.Href[0] == '/' {
+				links = append(links, *urlFlag+a.Href)
+			} else {
+				links = append(links, a.Href)
+			}
+		}
+	}
 
-	fmt.Println(links)
+	for _, l := range links {
+		fmt.Println(l)
+	}
 }
