@@ -12,11 +12,8 @@ import (
 	"golang.org/x/net/html"
 )
 
-func main() {
-	urlFlag := flag.String("u", "https://www.calhoun.io", "URL to scan")
-	flag.Parse()
-
-	res, err := http.Get(*urlFlag)
+func parseHtml(url string) []link.Link {
+	res, err := http.Get(url)
 	if err != nil {
 		panic(err)
 	}
@@ -31,5 +28,14 @@ func main() {
 		panic(err)
 	}
 	links := link.FindLinks(doc)
+	return links
+}
+
+func main() {
+	urlFlag := flag.String("u", "https://www.calhoun.io", "URL to scan")
+	flag.Parse()
+
+	links := parseHtml(*urlFlag)
+
 	fmt.Println(links)
 }
