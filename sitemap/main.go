@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/xml"
 	"flag"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/ssilatel/gophercises/link"
@@ -74,6 +76,17 @@ func visitLinks(linksToVisit []string) []string {
 	return newLinks
 }
 
+const xmlns = "http://www.sitemaps.org/schemas/sitemap/0.9"
+
+type loc struct {
+	Value string `xml:"loc"`
+}
+
+type urlset struct {
+	Urls  []loc  `xml:"url"`
+	Xmlns string `xml:"xmlns,attr"`
+}
+
 func main() {
 	urlFlag := flag.String("u", "https://www.calhoun.io", "URL to scan")
 	flag.Parse()
@@ -83,7 +96,18 @@ func main() {
 
 	visitedLinks := visitLinks(rootLinks)
 
-	for _, l := range visitedLinks {
-		fmt.Println(l)
+	toXml := urlset{
+		Xmlns: xmlns,
 	}
+	for _, v := range visitedLinks {
+		toXml.Urls = append(toXml.Urls, loc{v})
+	}
+
+	fmt.Print(xml.Header)
+	enc := xml.NewEncoder(os.Stdout)
+	enc.Indent("", "  ")
+	if err := enc.Encode(toXml); err != nil {
+		panic(err)
+	}
+	fmt.Println()
 }
